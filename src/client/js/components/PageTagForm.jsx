@@ -1,5 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import { Typeahead } from 'react-bootstrap-typeahead';
 
 /**
  *
@@ -17,10 +18,11 @@ export default class PageTagForm extends React.Component {
 
     this.state = {
       pageTags: this.props.pageTags,
+      emptyLabel: true,
     };
 
-    this.updateState = this.updateState.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
+    this.selectTag = this.selectTag.bind(this);
   }
 
   componentWillReceiveProps(nextProps) {
@@ -29,33 +31,39 @@ export default class PageTagForm extends React.Component {
     });
   }
 
-  handleSubmit() {
-    this.props.submitTags(this.state.pageTags);
+  handleSubmit(e) {
+
   }
 
-  updateState(value) {
-    this.setState({pageTags: value});
+  selectTag(selected) {
+    this.setState({pageTags: this.state.pageTags.push(selected)});
   }
 
   render() {
+    const options = [
+      'John',
+      'Miles',
+      'Charles',
+      'Herbie',
+    ];
     return (
-      <div className="input-group-sm mx-1">
-        <input className="form-control page-tag-form" type="text" value={this.state.pageTags} placeholder="tag name"
-          data-toggle="popover"
-          title="タグ"
-          data-content="タグ付けによりページをカテゴライズすることができます。"
-          data-trigger="focus"
-          data-placement="right"
-          onChange={e => this.updateState(e.target.value)}
-          onBlur={this.handleSubmit}
-          />
+      <div className="tag-typeahead">
+        <Typeahead
+          multiple={true}
+          labelKey="name"
+          emptyLabel={''}
+          options={options}
+          placeholder="tag name"
+          // onBlur={this.handleSubmit}
+          onChange={this.selectTag}
+        />
       </div>
     );
   }
 }
 
 PageTagForm.propTypes = {
-  pageTags: PropTypes.string,
+  pageTags: PropTypes.array,
   submitTags: PropTypes.func,
 };
 

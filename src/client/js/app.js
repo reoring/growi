@@ -65,8 +65,8 @@ let pagePath;
 let pageContent = '';
 let markdown = '';
 let slackChannels;
-let currentPageTags = '';
-let newPageTags = '';
+let currentPageTags = [];
+let newPageTags = [];
 if (mainContent !== null) {
   pageId = mainContent.getAttribute('data-page-id') || null;
   pageRevisionId = mainContent.getAttribute('data-page-revision-id');
