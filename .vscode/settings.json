@@ -6,7 +6,11 @@
     "javascript": "jsx"
   },
 
-  // for prettier-stylelint
+  // for prettier-vscode
+  "prettier.eslintIntegration": true,
+  "[javascript]": {
+    "editor.formatOnSave": true
+  },
   "prettier.stylelintIntegration": true,
   "[scss]": {
     "editor.formatOnSave": true

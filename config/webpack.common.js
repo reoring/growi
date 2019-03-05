@@ -15,48 +15,54 @@ const LodashModuleReplacementPlugin = require('lodash-webpack-plugin');
  *
  * See: http://webpack.github.io/docs/configuration.html#cli
  */
-module.exports = (options) => {
+module.exports = options => {
   return {
     mode: options.mode,
-    entry: Object.assign({
-      'js/app':                       './src/client/js/app',
-      'js/installer':                 './src/client/js/installer',
-      'js/legacy':                    './src/client/js/legacy/crowi',
-      'js/legacy-admin':              './src/client/js/legacy/crowi-admin',
-      'js/legacy-presentation':       './src/client/js/legacy/crowi-presentation',
-      'js/plugin':                    './src/client/js/plugin',
-      'js/ie11-polyfill':             './src/client/js/ie11-polyfill',
-      'js/hackmd-agent':              './src/client/js/hackmd-agent',
-      'js/hackmd-styles':             './src/client/js/hackmd-styles',
-      // styles
-      'styles/style-app':             './src/client/styles/scss/style-app.scss',
-      'styles/style-presentation':    './src/client/styles/scss/style-presentation.scss',
-      // themes
-      'styles/theme-default':         './src/client/styles/scss/theme/default.scss',
-      'styles/theme-default-dark':    './src/client/styles/scss/theme/default-dark.scss',
-      'styles/theme-nature':          './src/client/styles/scss/theme/nature.scss',
-      'styles/theme-mono-blue':       './src/client/styles/scss/theme/mono-blue.scss',
-      'styles/theme-future':          './src/client/styles/scss/theme/future.scss',
-      'styles/theme-blue-night':      './src/client/styles/scss/theme/blue-night.scss',
-      'styles/theme-kibela':          './src/client/styles/scss/theme/kibela.scss',
-      'styles/theme-halloween':       './src/client/styles/scss/theme/halloween.scss',
-      'styles/theme-wood':          './src/client/styles/scss/theme/wood.scss',
-      'styles/theme-christmas':          './src/client/styles/scss/theme/christmas.scss',
-      'styles/theme-island':      './src/client/styles/scss/theme/island.scss',
-      // styles for external services
-      'styles/style-hackmd':          './src/client/styles/hackmd/style.scss',
-    }, options.entry || {}),  // Merge with env dependent settings
-    output: Object.assign({
-      path: helpers.root('public'),
-      publicPath: '/',
-      filename: '[name].bundle.js',
-    }, options.output || {}), // Merge with env dependent settings
+    entry: Object.assign(
+      {
+        'js/app': './src/client/js/app',
+        'js/installer': './src/client/js/installer',
+        'js/legacy': './src/client/js/legacy/crowi',
+        'js/legacy-admin': './src/client/js/legacy/crowi-admin',
+        'js/legacy-presentation': './src/client/js/legacy/crowi-presentation',
+        'js/plugin': './src/client/js/plugin',
+        'js/ie11-polyfill': './src/client/js/ie11-polyfill',
+        'js/hackmd-agent': './src/client/js/hackmd-agent',
+        'js/hackmd-styles': './src/client/js/hackmd-styles',
+        // styles
+        'styles/style-app': './src/client/styles/scss/style-app.scss',
+        'styles/style-presentation': './src/client/styles/scss/style-presentation.scss',
+        // themes
+        'styles/theme-default': './src/client/styles/scss/theme/default.scss',
+        'styles/theme-default-dark': './src/client/styles/scss/theme/default-dark.scss',
+        'styles/theme-nature': './src/client/styles/scss/theme/nature.scss',
+        'styles/theme-mono-blue': './src/client/styles/scss/theme/mono-blue.scss',
+        'styles/theme-future': './src/client/styles/scss/theme/future.scss',
+        'styles/theme-blue-night': './src/client/styles/scss/theme/blue-night.scss',
+        'styles/theme-kibela': './src/client/styles/scss/theme/kibela.scss',
+        'styles/theme-halloween': './src/client/styles/scss/theme/halloween.scss',
+        'styles/theme-wood': './src/client/styles/scss/theme/wood.scss',
+        'styles/theme-christmas': './src/client/styles/scss/theme/christmas.scss',
+        'styles/theme-island': './src/client/styles/scss/theme/island.scss',
+        // styles for external services
+        'styles/style-hackmd': './src/client/styles/hackmd/style.scss',
+      },
+      options.entry || {}, // Merge with env dependent settings
+    ),
+    output: Object.assign(
+      {
+        path: helpers.root('public'),
+        publicPath: '/',
+        filename: '[name].bundle.js',
+      },
+      options.output || {}, // Merge with env dependent settings
+    ),
     externals: {
       // require("jquery") is external and available
       //  on the global var jQuery
-      'jquery': 'jQuery',
-      'emojione': 'emojione',
-      'hljs': 'hljs',
+      jquery: 'jQuery',
+      emojione: 'emojione',
+      hljs: 'hljs',
     },
     resolve: {
       extensions: ['.js', '.jsx', '.json'],
@@ -69,36 +75,36 @@ module.exports = (options) => {
         '@alias/logger': helpers.root('src/lib/service/logger'),
         '@alias/locales': helpers.root('resource/locales'),
         // replace bunyan
-        'bunyan': 'browser-bunyan',
-      }
+        bunyan: 'browser-bunyan',
+      },
     },
     module: {
       rules: options.module.rules.concat([
         {
           test: /.jsx?$/,
           exclude: {
-            test:    helpers.root('node_modules'),
-            exclude: [  // include as a result
+            test: helpers.root('node_modules'),
+            exclude: [
+              // include as a result
               { test: helpers.root('node_modules', 'growi-plugin-') },
               helpers.root('node_modules/codemirror/src'),
               helpers.root('node_modules/string-width'),
               helpers.root('node_modules/is-fullwidth-code-point'), // depends from string-width
-            ]
+            ],
           },
-          use: [{
-            loader: 'babel-loader?cacheDirectory'
-          }]
+          use: [{ loader: 'babel-loader?cacheDirectory' }],
         },
         {
           test: /locales/,
           loader: '@alienfast/i18next-loader',
           options: {
             basenameAsNamespace: true,
-          }
+          },
         },
-        { // see https://github.com/abpetkov/switchery/issues/120
+        {
+          // see https://github.com/abpetkov/switchery/issues/120
           test: /switchery\.js$/,
-          loader: 'imports-loader?module=>false,exports=>false,define=>false,this=>window'
+          loader: 'imports-loader?module=>false,exports=>false,define=>false,this=>window',
         },
         /*
          * File loader for supporting images, for example, in CSS files.
@@ -108,15 +114,14 @@ module.exports = (options) => {
           use: 'file-loader',
         },
         /* File loader for supporting fonts, for example, in CSS files.
-        */
+         */
         {
           test: /\.(eot|woff2?|svg|ttf)([?]?.*)$/,
           use: 'null-loader',
-        }
-      ])
+        },
+      ]),
     },
     plugins: options.plugins.concat([
-
       new WebpackAssetsManifest({ publicPath: true }),
 
       new webpack.DefinePlugin({
@@ -127,14 +132,14 @@ module.exports = (options) => {
       new webpack.IgnorePlugin(/^\.\/lib\/deflate\.js/, /markdown-it-plantuml/),
 
       new LodashModuleReplacementPlugin({
-        flattening: true
+        flattening: true,
       }),
 
-      new webpack.ProvidePlugin({ // refs externals
+      // refs externals
+      new webpack.ProvidePlugin({
         jQuery: 'jquery',
         $: 'jquery',
       }),
-
     ]),
 
     devtool: options.devtool,
@@ -145,14 +150,14 @@ module.exports = (options) => {
         cacheGroups: {
           style_commons: {
             test: /\.(sc|sa|c)ss$/,
-            chunks: (chunk) => {
+            chunks: chunk => {
               // ignore patterns
               return chunk.name != null && !chunk.name.match(/style-|theme-|legacy-admin|legacy-presentation/);
             },
             name: 'styles/style-commons',
             minSize: 1,
             priority: 30,
-            enforce: true
+            enforce: true,
           },
           commons: {
             test: /src[\\/].*\.jsx?$/,
@@ -160,20 +165,20 @@ module.exports = (options) => {
             name: 'js/commons',
             minChunks: 2,
             minSize: 1,
-            priority: 20
+            priority: 20,
           },
           vendors: {
             test: /node_modules[\\/].*\.jsx?$/,
-            chunks: (chunk) => {
+            chunks: chunk => {
               // ignore patterns
               return chunk.name != null && !chunk.name.match(/legacy-presentation|ie11-polyfill|hackmd-/);
             },
             name: 'js/vendors',
             minSize: 1,
             priority: 10,
-            enforce: true
+            enforce: true,
           },
-        }
+        },
       },
       minimizer: options.optimization.minimizer || [],
     },

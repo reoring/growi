@@ -30,31 +30,31 @@ module.exports = require('./webpack.common')({
       {
         test: /\.(css|scss)$/,
         use: [
-          'style-loader',
+          'style-loader', //
           { loader: 'css-loader', options: { sourceMap: true } },
           { loader: 'sass-loader', options: { sourceMap: true } },
         ],
         exclude: [
-          helpers.root('src/client/styles/hackmd'),
+          helpers.root('src/client/styles/hackmd'), //
           helpers.root('src/client/styles/scss/style-presentation.scss'),
-        ]
+        ],
       },
-      { // Dump CSS for HackMD
+      // Dump CSS for HackMD
+      {
         test: /\.(css|scss)$/,
         use: [
-          MiniCssExtractPlugin.loader,
+          MiniCssExtractPlugin.loader, //
           'css-loader',
-          'sass-loader'
+          'sass-loader',
         ],
         include: [
-          helpers.root('src/client/styles/hackmd'),
+          helpers.root('src/client/styles/hackmd'), //
           helpers.root('src/client/styles/scss/style-presentation.scss'),
-        ]
+        ],
       },
     ],
   },
   plugins: [
-
     new MiniCssExtractPlugin({
       filename: '[name].bundle.css',
     }),
@@ -67,11 +67,9 @@ module.exports = require('./webpack.common')({
     new BundleAnalyzerPlugin({
       analyzerMode: ANALYZE ? 'server' : 'disabled',
     }),
-
   ],
   optimization: {},
   performance: {
-    hints: false
-  }
-
+    hints: false,
+  },
 });
