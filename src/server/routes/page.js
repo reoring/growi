@@ -3,7 +3,7 @@ module.exports = function(crowi, app) {
 
   const debug = require('debug')('growi:routes:page')
     , logger = require('@alias/logger')('growi:routes:page')
-    , pagePathUtils = require('@commons/util/page-path-utils')
+    , pathUtils = require('@commons/util/path-utils')
     , Page = crowi.model('Page')
     , User = crowi.model('User')
     , Tag = crowi.model('Tag')
@@ -50,8 +50,7 @@ module.exports = function(crowi, app) {
   }
 
   function getPathFromRequest(req) {
-    const path = '/' + (req.params[0] || '');
-    return path.replace(/\.md$/, '');
+    return pathUtils.normalizePath(req.params[0] || '');
   }
 
   function isUserPage(path) {
@@ -202,7 +201,7 @@ module.exports = function(crowi, app) {
       seener_threshold: SEENER_THRESHOLD,
     };
     renderVars.pager = generatePager(result.offset, result.limit, result.totalCount);
-    renderVars.pages = pagePathUtils.encodePagesPath(result.pages);
+    renderVars.pages = pathUtils.encodePagesPath(result.pages);
   }
 
   function replacePlaceholdersOfTemplate(template, req) {
@@ -235,7 +234,7 @@ module.exports = function(crowi, app) {
   }
 
   async function showPageListForCrowiBehavior(req, res, next) {
-    const portalPath = Page.addSlashOfEnd(getPathFromRequest(req));
+    const portalPath = pathUtils.addTrailingSlash(getPathFromRequest(req));
     const revisionId = req.query.revision;
 
     // check whether this page has portal page
@@ -282,7 +281,7 @@ module.exports = function(crowi, app) {
     }
     else if (page.redirectTo) {
       debug(`Redirect to '${page.redirectTo}'`);
-      return res.redirect(encodeURI(page.redirectTo + '?redirectFrom=' + pagePathUtils.encodePagePath(path)));
+      return res.redirect(encodeURI(page.redirectTo + '?redirectFrom=' + pathUtils.encodePagePath(path)));
     }
 
     logger.debug('Page is found when processing pageShowForGrowiBehavior', page._id, page.path);
@@ -378,12 +377,12 @@ module.exports = function(crowi, app) {
 
     // check whether this page has portal page
     if (!behaviorType || 'crowi' === behaviorType) {
-      const portalPagePath = Page.addSlashOfEnd(getPathFromRequest(req));
+      const portalPagePath = pathUtils.addTrailingSlash(getPathFromRequest(req));
       let hasPortalPage = await Page.count({ path: portalPagePath }) > 0;
 
       if (hasPortalPage) {
         logger.debug('The portal page is found', portalPagePath);
-        return res.redirect(encodeURI(portalPagePath + '?redirectFrom=' + pagePathUtils.encodePagePath(req.path)));
+        return res.redirect(encodeURI(portalPagePath + '?redirectFrom=' + pathUtils.encodePagePath(req.path)));
       }
     }
 
@@ -440,10 +439,12 @@ module.exports = function(crowi, app) {
   actions.notFound = async function(req, res) {
     const path = getPathFromRequest(req);
 
+    const isCreatable = Page.isCreatableName(path);
+
     let view;
     const renderVars = { path };
 
-    if (req.isForbidden) {
+    if (!isCreatable || req.isForbidden) {
       view = 'customlayout-selector/forbidden';
     }
     else {
@@ -495,7 +496,7 @@ module.exports = function(crowi, app) {
     }
 
     renderVars.pager = generatePager(result.offset, result.limit, result.totalCount);
-    renderVars.pages = pagePathUtils.encodePagesPath(result.pages);
+    renderVars.pages = pathUtils.encodePagesPath(result.pages);
     res.render('customlayout-selector/page_list', renderVars);
 
   };
@@ -509,7 +510,7 @@ module.exports = function(crowi, app) {
     const page = await Page.findByIdAndViewer(id, req.user);
 
     if (page != null) {
-      return res.redirect(pagePathUtils.encodePagePath(page.path));
+      return res.redirect(pathUtils.encodePagePath(page.path));
     }
 
     return res.redirect('/');
@@ -559,7 +560,7 @@ module.exports = function(crowi, app) {
         result.pages.pop();
       }
 
-      result.pages = pagePathUtils.encodePagesPath(result.pages);
+      result.pages = pathUtils.encodePagesPath(result.pages);
       return res.json(ApiResponse.success(result));
     }
     catch (err) {
@@ -1013,7 +1014,7 @@ module.exports = function(crowi, app) {
   api.rename = async function(req, res) {
     const pageId = req.body.page_id;
     const previousRevision = req.body.revision_id || null;
-    const newPagePath = Page.normalizePath(req.body.new_path);
+    const newPagePath = pathUtils.normalizePath(req.body.new_path);
     const options = {
       createRedirectPage: req.body.create_redirect || 0,
       moveUnderTrees: req.body.move_trees || 0,
@@ -1077,7 +1078,7 @@ module.exports = function(crowi, app) {
    */
   api.duplicate = async function(req, res) {
     const pageId = req.body.page_id;
-    const newPagePath = Page.normalizePath(req.body.new_path);
+    const newPagePath = pathUtils.normalizePath(req.body.new_path);
 
     const page = await Page.findByIdAndViewer(pageId, req.user);
 
@@ -1139,7 +1140,7 @@ module.exports = function(crowi, app) {
 
     try {
       let result = await Page.findListByCreator(page.creator, req.user, queryOptions);
-      result.pages = pagePathUtils.encodePagesPath(result.pages);
+      result.pages = pathUtils.encodePagesPath(result.pages);
 
       return res.json(ApiResponse.success(result));
     }
